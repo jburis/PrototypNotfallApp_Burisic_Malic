@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ärzte Watch App Prototyp (Notfall V2.0)</title>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --card-bg: #1c1c1e;
+            --accent-color: #32d74b; /* Apple Health Green */
+            --danger-color: #ff453a;
+            --critical-color: #ff3b30; /* Bright Red */
+            --warning-color: #ffd60a; /* Yellow */
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+            --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: var(--font-stack);
+            overflow: hidden;
+        }
+
+        /* Apple Watch Gehäuse Simulation */
+        .watch-case {
+            width: 360px;
+            height: 440px;
+            background: #111;
+            border-radius: 60px;
+            box-shadow: 
+                0 0 0 10px #222, 
+                0 20px 50px rgba(0,0,0,0.5),
+                inset 0 0 20px rgba(255,255,255,0.1);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Digital Crown (Optik) */
+        .crown {
+            position: absolute;
+            right: -16px;
+            top: 100px;
+            width: 12px;
+            height: 50px;
+            background: #333;
+            border-radius: 4px;
+            box-shadow: inset -2px 0 5px rgba(0,0,0,0.5);
+        }
+
+        .side-button {
+            position: absolute;
+            right: -12px;
+            top: 180px;
+            width: 8px;
+            height: 80px;
+            background: #333;
+            border-radius: 4px;
+        }
+
+        /* Der Bildschirm */
+        .screen {
+            width: 324px;
+            height: 394px;
+            background-color: var(--bg-color);
+            border-radius: 40px;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+        }
+
+        .screen:active {
+            cursor: grabbing;
+        }
+
+        /* Container für die Seiten */
+        .pages-container {
+            display: flex;
+            height: 100%;
+            width: 300%;
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        /* Einzelne Seite */
+        .page {
+            width: 324px;
+            height: 394px;
+            box-sizing: border-box;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        /* Scrollbalken verstecken */
+        .page::-webkit-scrollbar { display: none; }
+
+        /* --- UI Elemente --- */
+        
+        h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 5px 0 10px 0;
+            color: var(--text-primary);
+        }
+
+        h2 {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--accent-color);
+            margin: 10px 0 5px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px; 
+            padding-bottom: 6px;
+            border-bottom: 0.5px solid #333;
+        }
+
+        .metric-label {
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .metric-unit {
+            font-size: 16px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+        
+        /* ALARM KLASSEN */
+        .critical-value {
+            color: var(--critical-color) !important;
+            font-weight: 900;
+        }
+
+        .critical-card {
+            background-color: rgba(255, 69, 58, 0.3);
+            border: 2px solid var(--critical-color);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 8px;
+        }
+
+        .list-item {
+            font-size: 18px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .list-item.critical-med::before {
+             content: "•";
+             color: var(--warning-color);
+             margin-right: 8px;
+             font-size: 20px;
+        }
+        
+        .list-item:not(.critical-med)::before {
+            content: "•";
+            color: var(--accent-color);
+            margin-right: 8px;
+            font-size: 20px;
+        }
+
+
+        /* Notfall-Button */
+        .action-button {
+            width: 100%;
+            padding: 12px 0;
+            background-color: var(--critical-color);
+            color: var(--text-primary);
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            margin-top: 15px;
+            box-shadow: 0 4px 10px rgba(255, 59, 48, 0.6);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-transform: uppercase;
+        }
+
+        .action-button:active {
+            background-color: #cc332a;
+        }
+
+        /* EKG Simulation */
+        .ekg-container {
+            width: 100%;
+            height: 100px;
+            background: #111;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #333;
+            margin-top: 10px;
+        }
+
+        /* EKG Rhythmus Analyse Text */
+        .rhythm-analysis {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 5px;
+            padding-top: 5px;
+        }
+
+        /* SVG und Animation */
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        path {
+            stroke: var(--accent-color);
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw 2s linear infinite;
+        }
+
+        @keyframes draw {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        /* Page Dots unten */
+        .pagination {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.3);
+            transition: background-color 0.2s;
+        }
+
+        .dot.active {
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="watch-case">
+        <div class="crown"></div>
+        <div class="side-button"></div>
+        
+        <div class="screen" id="screen">
+            <div class="pages-container" id="container">
+                
+                <div class="page">
+                    <div style="color: var(--text-secondary); font-size: 14px; margin-bottom: 2px;">Patient: Max Mustermann</div>
+                    <h1>Status</h1>
+                    
+                    <div class="metric-row">
+                        <span class="metric-label">Herzfrequenz</span>
+                        <div>
+                            <span class="metric-value">65</span>
+                            <span class="metric-unit">bpm</span>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-row">
+                        <span class="metric-label">SpO2</span>
+                        <div>
+                            <span class="metric-value critical-value">90</span>
+                            <span class="metric-unit critical-value">%</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-row">
+                        <span class="metric-label">Blutdruck</span>
+                        <div>
+                            <span class="metric-value">120/80</span>
+                            <span class="metric-unit">mmHg</span>
+                        </div>
+                    </div>
+
+                    <h2>KRITISCHE INFO</h2>
+                    <div class="card critical-card">
+                        <div class="list-item" style="color: var(--critical-color); font-size: 20px; font-weight: 700;">ALLERGIE: Penicillin</div>
+                    </div>
+
+                    <button class="action-button">NOTFALLPROTOKOLL STARTEN</button>
+                </div>
+
+                <div class="page">
+                    <h1>Therapie & Kontext</h1>
+                    
+                    <h2>Medikamente (Wichtig)</h2>
+                    <div class="card">
+                        <div class="list-item critical-med" style="color: var(--warning-color);">Metoprolol 50mg (Beta-Blocker)</div>
+                        <div class="list-item">Ramipril 5mg</div>
+                        <div class="list-item">ASS 100mg</div>
+                    </div>
+                    
+                    <h2>Bewegungsprofile</h2>
+                    <div class="card">
+                        <div class="list-item">Gehen: Eingeschränkt</div>
+                        <div class="list-item">Mobilisation: Stufe 2</div>
+                    </div>
+                </div>
+
+                <div class="page">
+                    <h1>Analyse</h1>
+                    
+                    <h2>Live EKG (II)</h2>
+                    <div class="rhythm-analysis">Sinusrhythmus (Analyse)</div>
+                    <div class="ekg-container">
+                        <svg viewBox="0 0 300 100" preserveAspectRatio="none">
+                            <path d="M0,50 L20,50 L30,40 L40,60 L50,50 L60,50 L70,20 L80,80 L90,50 L110,50 L120,40 L130,50 L150,50 L170,50 L180,40 L190,60 L200,50 L210,50 L220,20 L230,80 L240,50 L260,50 L270,40 L280,50 L300,50" />
+                        </svg>
+                    </div>
+
+                    <h2>Chronisch</h2>
+                    <div class="card">
+                        <div class="list-item">Hypertonie (Grad 2)</div>
+                        <div class="list-item">Diabetes Typ 2</div>
+                        <div class="list-item">Herzinsuffizienz</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="pagination">
+                <div class="dot active" id="dot0"></div>
+                <div class="dot" id="dot1"></div>
+                <div class="dot" id="dot2"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const screen = document.getElementById('screen');
+        const container = document.getElementById('container');
+        const dots = [document.getElementById('dot0'), document.getElementById('dot1'), document.getElementById('dot2')];
+        
+        let startX = 0;
+        let currentTranslate = 0;
+        let prevTranslate = 0;
+        let isDragging = false;
+        let currentIndex = 0;
+
+        // Touch Events
+        screen.addEventListener('touchstart', touchStart);
+        screen.addEventListener('touchend', touchEnd);
+        screen.addEventListener('touchmove', touchMove);
+
+        // Mouse Events
+        screen.addEventListener('mousedown', touchStart);
+        screen.addEventListener('mouseup', touchEnd);
+        screen.addEventListener('mouseleave', () => { if(isDragging) touchEnd() });
+        screen.addEventListener('mousemove', touchMove);
+
+        // Kontextmenü verhindern
+        window.oncontextmenu = function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        };
+
+        function touchStart(event) {
+            isDragging = true;
+            startX = getPositionX(event);
+            container.style.transition = 'none'; // Instant movement while dragging
+        }
+
+        function touchMove(event) {
+            if (isDragging) {
+                const currentX = getPositionX(event);
+                const diff = currentX - startX;
+                currentTranslate = prevTranslate + diff;
+                container.style.transform = `translateX(${currentTranslate}px)`;
+            }
+        }
+
+        function touchEnd() {
+            isDragging = false;
+            const movedBy = currentTranslate - prevTranslate;
+
+            // Schwellenwert zum Wechseln der Seite (50px)
+            if (movedBy < -50 && currentIndex < 2) currentIndex += 1;
+            if (movedBy > 50 && currentIndex > 0) currentIndex -= 1;
+
+            setPositionByIndex();
+        }
+
+        function getPositionX(event) {
+            return event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
+        }
+
+        function setPositionByIndex() {
+            currentTranslate = currentIndex * -324; // Breite der Uhr
+            prevTranslate = currentTranslate;
+            container.style.transition = 'transform 0.3s ease-out';
+            container.style.transform = `translateX(${currentTranslate}px)`;
+            updateDots();
+        }
+
+        function updateDots() {
+            dots.forEach(dot => dot.classList.remove('active'));
+            dots[currentIndex].classList.add('active');
+        }
+    </script>
+</body>
+</html>
