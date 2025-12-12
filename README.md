@@ -38,13 +38,3 @@ Die Version 2.0 (Aktueller Code) wurde entwickelt, um die App für den Notfall-E
 | **Quick-Action Button** | Ein großer, roter Button **"NOTFALLPROTOKOLL STARTEN"** wurde auf Seite 1 hinzugefügt. | Startet eine vordefinierte Kette von Aktionen: Team-Alarmierung, Start des Zeitstempels für die Reanimationsdokumentation, Aktivierung von Checklisten. |
 | **Medikamenten-Highlight** | Auf Seite 2 werden kritische Medikamente (z.B. Betablocker) visuell hervorgehoben. | Liefert schnellen Kontext zu potenziellen Wirkungen im Notfall. |
 | **EKG-Analyse-Label** | Auf Seite 3 wird der Rhythmus (z.B. "Sinusrhythmus") in großer Schrift über der Kurve angezeigt. | Schnelle visuelle Bestätigung der maschinellen Rhythmus-Analyse. |
-
-## 3. Weiterführende Empfehlungen
-
-Zur vollständigen Ausnutzung der Apple Watch als Notfallinstrument wurden folgende Vorschläge für zukünftige Iterationen gemacht:
-
-1.  **Mini-Trend-Graphen (Sparklines):** Integrieren Sie eine Mini-Historie des Werteverlaufs in die Vitalzeilen (Seite 1).
-2.  **Digital Crown Quick-Input:** Nutzung des Drehrads zur schnellen Auswahl und Protokollierung von Notfallmedikamenten ohne Touchscreen-Eingabe.
-3.  **Haptisches Feedback:** Nutzung der Vibrationsmuster zur Unterscheidung der Dringlichkeit von Alarmen.
-4.  **Patient-ID Verifizierung:** Möglichkeit zur Verifizierung der Patientenakte über NFC/QR-Code, um Verwechslungen auszuschließen.
-5.  **Sprachnotizen:** Integration einer Diktierfunktion zur schnellen Protokollierung von Befunden und Aktionen.
